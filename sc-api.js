@@ -12,7 +12,7 @@ const csv_url = "https://docs.google.com/spreadsheets/d/1jOZRIfoZ-5WAjMMQYSH4_8o
 const filename = "./blacklist/Public Blacklist - Abusers - Sheet1.csv";
 
 app.get('/', function (req, res) {
-    res.send("If you are looking for the original <a href='https://steemit.com/christmas/@fredrikaa/introducing-steem-gift-cards-a-fun-way-to-give-someone-steem-for-the-holidays'>steemgifts</a> website, it has been discontinued, If you really really want a card though you can run the website yourself : https://github.com/drov0/steemgifts. <br/> If you came here because of steempress, there is nothing for you to see here :)")
+    res.send("Yep.")
 });
 
 app.listen(8080, function () {
@@ -34,10 +34,6 @@ async function storedata() {
     }
 
     console.log("done");
-
-
-
-
 }
 
 storedata()

@@ -9,7 +9,8 @@
     "express-handlebars": "^3.0.0",
     "mysql": "^2.15.0",
     "request": "^2.85.0",
-    "request-promise-native": "^1.0.5"
+    "request-promise-native": "^1.0.5",
+    "steem": "^0.7.1"
   },
   "devDependencies": {},
   "scripts": {
