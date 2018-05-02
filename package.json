@@ -1,15 +1,11 @@
 {
-  "name": "steemdata",
+  "name": "sc-api",
   "version": "1.0.0",
-  "description": "Parses the blockchain into a mysqldb",
+  "description": "Steemcleaners api",
   "main": "steemdata.js",
   "dependencies": {
-    "download": "^6.2.5",
     "express": "^4.16.3",
-    "express-handlebars": "^3.0.0",
     "mysql": "^2.15.0",
-    "request": "^2.85.0",
-    "request-promise-native": "^1.0.5",
     "steem": "^0.7.1",
     "xss": "^0.3.8"
   },
