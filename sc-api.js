@@ -1,9 +1,6 @@
 const db = require("./config.js");
-var http = require('http');
 const sanitize = require("xss");
-var fs = require('fs');
 const express = require('express');
-const download = require('download');
 const {promisify} = require('util');
 const bodyParser = require('body-parser');
 const urlencodedParser = bodyParser.urlencoded({extended: false});
@@ -12,16 +9,11 @@ const fn = promisify(db.query).bind(db);
 
 const app = express();
 
-const csv_url = "https://docs.google.com/spreadsheets/d/1jOZRIfoZ-5WAjMMQYSH4_8o0b11Ua1Bcx_sCBKRGgGc/export?format=csv";
-const filename = "./blacklist/Public Blacklist - Abusers - Sheet1.csv";
-
-
 function group_add(data)
 {
     return new Promise(async resolve => {
         if (data['name'] && data['description'] && data['name'] !== "" && data['description'] !== "") {
-            let result = await fn("select * from _group where name = ?", [data['name']]);
-            if (result.length > 0)
+            if ((await fn("select 1 from _group where name = ?", [data['name']])).length > 0)
                 return resolve({error: "Group name already defined"});
             else
                 await fn("INSERT INTO _group(id,name,description) VALUES(NULL,? ,?)", [data['name'], data['description']]).catch(function (err) {
@@ -82,19 +74,19 @@ function list_add(data)
 
             if (result.length > 0) {
                 const id = result[0]['id'];
-                    await fn("insert into "+data['list']+" (name, _group, category, added_by) VALUES(?,?,?,?)", [data['name'], id, data['category'], data['added_by']]).catch(function (err) {
-                        if (err.code === "ER_DUP_ENTRY")
-                            return resolve({error: "User is already in the list"});
-                        else
-                            return resolve({error: "Internal error"});
-                    });
-                    return resolve({ok: "ok"});
-                }
+                await fn("insert into "+data['list']+" (name, _group, category, added_by) VALUES(?,?,?,?)", [data['name'], id, data['category'], data['added_by']]).catch(function (err) {
+                    if (err.code === "ER_DUP_ENTRY")
+                        return resolve({error: "User is already in the list"});
+                    else
+                        return resolve({error: "Internal error"});
+                });
+                return resolve({ok: "ok"});
+            }
             else
                 return resolve({error: "Group name unknown"});
         }
         else
-            // TODO : Be more specific
+        // TODO : Be more specific
             return resolve({error: "invalid parameters."})
     });
 }
@@ -130,16 +122,16 @@ function list_delete(data, list)
 {
     return new Promise(async resolve => {
         if (data['name'] && data['name'] !== "") {
-                const id = result[0]['id'];
-                const exists = await fn("select 1 from "+list+" where name = ?", [data['name']]);
-                if (exists.length > 0) {
+            const id = result[0]['id'];
+            const exists = await fn("select 1 from "+list+" where name = ?", [data['name']]);
+            if (exists.length > 0) {
 
-                    await fn("delete from " + list + " where name = ?", [data['name']]).catch(function (err) {
-                        return resolve({error: "Internal error"});
-                    });
-                    return resolve({ok: "ok"});
-                } else
-                    return resolve({error: "username not in the list"});
+                await fn("delete from " + list + " where name = ?", [data['name']]).catch(function (err) {
+                    return resolve({error: "Internal error"});
+                });
+                return resolve({ok: "ok"});
+            } else
+                return resolve({error: "username not in the list"});
         }
         else
         // TODO : Be more specific
@@ -151,16 +143,15 @@ function list_get(data)
 {
     return new Promise(async resolve => {
         if (data['name'] && data['name'] !== "") {
-                const blacklist = await fn("select 1 from blacklist where name = ?", [data['name']]);
-                if (blacklist.length > 0)
-                        return resolve({list:"blacklist"});
+            const blacklist = await fn("select 1 from blacklist where name = ?", [data['name']]);
+            if (blacklist.length > 0)
+                return resolve({list:"blacklist"});
 
-                const low_quality = await fn("select 1 from low_quality where name = ?", [data['name']]);
-                if (low_quality.length > 0)
-                    return resolve({list:"low_quality"});
+            const low_quality = await fn("select 1 from low_quality where name = ?", [data['name']]);
+            if (low_quality.length > 0)
+                return resolve({list:"low_quality"});
 
             return resolve({list:"none"});
-
         }
         else
         // TODO : Be more specific
@@ -169,7 +160,7 @@ function list_get(data)
 }
 
 app.post('/', urlencodedParser, async function (req, res) {
-    var data = sanitize(req.body.data);
+    let data = sanitize(req.body.data);
 
     try
     {
@@ -179,50 +170,36 @@ app.post('/', urlencodedParser, async function (req, res) {
         return res.send({error:"Invalid json"})
     }
 
+    if (data['list'] !== "blacklist" && data['list'] !== "low_quality"  && data['list'] !== "group")
+        res.send({error:"Unknown list"})
+
+
     if (data['action'] === "add")
     {
         // TODO : Add authentification
         if (data['list'] === "group")
-        {
             res.send((await group_add(data)));
-        } else if (data['list'] === "blacklist" || data['list'] === "low_quality")
-        {
+        else if (data['list'] === "blacklist" || data['list'] === "low_quality")
             res.send((await list_add(data)));
-        } else
-        {
-            res.send({error:"Unknown list"})
-        }
-    } else if (data['action'] === "edit")
-    {
-        if (data['list'] === "group")
-        {
-            const edit_result = await group_edit(data);
-            return res.send(edit_result);
-        } else if (data['list'] === "blacklist" || data['list'] === "low_quality")
-        {
-            res.send((await list_edit(data)));
-        } else
-        {
-            res.send({error:"Unknown list"})
-        }
-
-    } else if (data['action'] === "delete")
-    {
-        if (data['list'] === "group")
-        {
-            const edit_result = await group_delete(data);
-            return res.send(edit_result);
-        } else if (data['list'] === "blacklist" || data['list'] === "low_quality")
-        {
-            res.send((await list_delete(data)));
-        } else
-        {
-            res.send({error:"Unknown list"})
-        }
-    } else if (data['action'] === "get")
-    {
-        res.send((await list_get(data, data['list'])));
     }
+    else if (data['action'] === "edit")
+    {
+        if (data['list'] === "group")
+            res.send((await group_edit(data)));
+        else if (data['list'] === "blacklist" || data['list'] === "low_quality")
+            res.send((await list_edit(data)));
+    }
+    else if (data['action'] === "delete")
+    {
+        if (data['list'] === "group")
+            res.send((await group_delete(data)));
+        else if (data['list'] === "blacklist" || data['list'] === "low_quality")
+            res.send((await list_delete(data)));
+    }
+    else if (data['action'] === "get")
+        res.send((await list_get(data, data['list'])));
+    else
+        res.send({error:"Unknown action"})
 
 
 });
