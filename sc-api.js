@@ -32,8 +32,7 @@ function group_edit(data)
 {
     return new Promise(async resolve => {
         if (data['name'] && data['description'] && data['name'] !== "" && data['description'] !== "") {
-            let result = await fn("select * from _group where name = ?", [data['name']]);
-            if (result.length > 0) {
+            if ((await fn("select * from _group where name = ?", [data['name']])).length > 0) {
                 await fn("UPDATE _group set name = ?, description = ? where name = ?", [data['name'], data['description'], data['name']]).catch(function (err) {
                     return resolve({error: "Internal server error"});
                 });
@@ -51,8 +50,7 @@ function group_delete(data)
 {
     return new Promise(async resolve => {
         if (data['name'] && data['name'] !== "") {
-            let result = await fn("select * from _group where name = ?", [data['name']]);
-            if (result.length > 0) {
+            if ((await fn("select * from _group where name = ?", [data['name']])).length > 0) {
                 await fn("DELETE FROM _group where name = ?", [data['name']]).catch(function (err) {
                     return resolve({error: "Internal server error"});
                 });
@@ -71,16 +69,36 @@ function list_add(data)
     return new Promise(async resolve => {
         if (data['name'] && data['group'] && data['category'] && data['added_by'] && data['name'] !== "" && data['group'] !== "" && data['category'] !== "" && data['added_by'] !== "") {
             const result = await fn("select id from _group where name = ?", [data['group']]);
-
             if (result.length > 0) {
                 const id = result[0]['id'];
-                await fn("insert into "+data['list']+" (name, _group, category, added_by) VALUES(?,?,?,?)", [data['name'], id, data['category'], data['added_by']]).catch(function (err) {
-                    if (err.code === "ER_DUP_ENTRY")
-                        return resolve({error: "User is already in the list"});
+
+                // TODO : Refactor to avoid the duplicate code
+                if (data['list'] === "blacklist")
+                    if ((await fn("select 1 from low_quality where name = ?", [data['name']])).length > 0)
+                        return resolve({error: "User is already in the low_quality list"});
                     else
-                        return resolve({error: "Internal error"});
-                });
-                return resolve({ok: "ok"});
+                    {
+                        await fn("insert into "+data['list']+" (name, _group, category, added_by) VALUES(?,?,?,?)", [data['name'], id, data['category'], data['added_by']]).catch(function (err) {
+                            if (err.code === "ER_DUP_ENTRY")
+                                return resolve({error: "User is already in the list"});
+                            else
+                                return resolve({error: "Internal error"});
+                        });
+                        return resolve({ok: "ok"});
+                    }
+                else if (data['list'] === "low_quality")
+                    if ((await fn("select 1 from blacklist where name = ?", [data['name']])).length > 0)
+                        return resolve({error: "User is already in the blacklist list"});
+                    else
+                    {
+                        await fn("insert into "+data['list']+" (name, _group, category, added_by) VALUES(?,?,?,?)", [data['name'], id, data['category'], data['added_by']]).catch(function (err) {
+                            if (err.code === "ER_DUP_ENTRY")
+                                return resolve({error: "User is already in the list"});
+                            else
+                                return resolve({error: "Internal error"});
+                        });
+                        return resolve({ok: "ok"});
+                    }
             }
             else
                 return resolve({error: "Group name unknown"});
@@ -122,11 +140,9 @@ function list_delete(data, list)
 {
     return new Promise(async resolve => {
         if (data['name'] && data['name'] !== "") {
-            const id = result[0]['id'];
-            const exists = await fn("select 1 from "+list+" where name = ?", [data['name']]);
+            const exists = await fn("select 1 from "+data['list']+" where name = ?", [data['name']]);
             if (exists.length > 0) {
-
-                await fn("delete from " + list + " where name = ?", [data['name']]).catch(function (err) {
+                await fn("delete from " + data['list'] + " where name = ?", [data['name']]).catch(function (err) {
                     return resolve({error: "Internal error"});
                 });
                 return resolve({ok: "ok"});
@@ -170,13 +186,18 @@ app.post('/', urlencodedParser, async function (req, res) {
         return res.send({error:"Invalid json"})
     }
 
-    if (data['list'] !== "blacklist" && data['list'] !== "low_quality"  && data['list'] !== "group")
-        res.send({error:"Unknown list"})
 
+    if (data['action'] === "get")
+        return res.send((await list_get(data)));
+
+
+    // TODO : Add authentification
+    if (data['list'] !== "blacklist" && data['list'] !== "low_quality"  && data['list'] !== "group")
+        return res.send({error:"Unknown list"});
 
     if (data['action'] === "add")
     {
-        // TODO : Add authentification
+
         if (data['list'] === "group")
             res.send((await group_add(data)));
         else if (data['list'] === "blacklist" || data['list'] === "low_quality")
@@ -196,10 +217,8 @@ app.post('/', urlencodedParser, async function (req, res) {
         else if (data['list'] === "blacklist" || data['list'] === "low_quality")
             res.send((await list_delete(data)));
     }
-    else if (data['action'] === "get")
-        res.send((await list_get(data, data['list'])));
     else
-        res.send({error:"Unknown action"})
+        return res.send({error:"Unknown action"})
 
 
 });
@@ -238,6 +257,14 @@ curl --data 'data={"data":{"action":"edit","list":"group","name":"noganoo","desc
 edit a list
 
 curl --data 'data={"data":{"action":"edit","list":"blacklist","name":"noganoo","group":"noganoo","category":"1","added_by":"patrice"}}' http://localhost:8080
+
+delete from list
+
+curl --data 'data={"data":{"action":"delete","list":"blacklist","name":"noganoo"}}' http://localhost:8080
+
+delete group
+
+curl --data 'data={"data":{"action":"delete","list":"group","name":"noganoo"}}' http://localhost:8080
 
 get an user
 
