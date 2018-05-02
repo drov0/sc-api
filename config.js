@@ -9,4 +9,6 @@ var connection = mysql.createConnection({
 
 connection.connect();
 
-module.exports =  connection;
+const admins = ["patrice"];
+
+module.exports =  {db:connection, admins:admins};
