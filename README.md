@@ -6,31 +6,31 @@ Add a proper documentation of all the possible outputs
 
 ## Add a group
 
-> curl --data 'data={"data":{"action":"add","list":"group","name":"noganoo","description":"bad mofo"}}' http://localhost:8080
+> curl --data 'data={"data":{"action":"add","list":"group","name":"noganoo","description":"bad mofo", "username":"howo", wif:"yourwifhere", "type":"memo"}}' http://localhost:8080
 
 ## Add an user to the blacklist
 
-> curl --data 'data={"data":{"action":"add","list":"blacklist","name":"noganoo","group":"noganoo","category":"1","added_by":"patrice"}}' http://localhost:8080
+> curl --data 'data={"data":{"action":"add","list":"blacklist","name":"noganoo","group":"noganoo","category":"1","added_by":"patrice", "username":"howo",wif:"yourwifhere", "type":"memo"}}' http://localhost:8080
 
 ## Add an user to the low_quality list
 
-> curl --data 'data={"data":{"action":"add","list":"low_quality","name":"noganoo","group":"noganoo","category":"1","added_by":"patrice"}}' http://localhost:8080
+> curl --data 'data={"data":{"action":"add","list":"low_quality","name":"noganoo","group":"noganoo","category":"1","added_by":"patrice", "username":"howo",wif:"yourwifhere", "type":"memo"}}' http://localhost:8080
 
 ## Edit a group :
 
-> curl --data 'data={"data":{"action":"edit","list":"group","name":"noganoo","description":"meanie"}}' http://localhost:8080
+> curl --data 'data={"data":{"action":"edit","list":"group","name":"noganoo","description":"meanie", "username":"howo",wif:"yourwifhere", "type":"memo"}}' http://localhost:8080
 
 ## Edit a list
 
-> curl --data 'data={"data":{"action":"edit","list":"blacklist","name":"noganoo","group":"noganoo","category":"1","added_by":"patrice"}}' http://localhost:8080
+> curl --data 'data={"data":{"action":"edit","list":"blacklist","name":"noganoo","group":"noganoo","category":"1","added_by":"patrice", "username":"howo",wif:"yourwifhere", "type":"memo"}}' http://localhost:8080
 
 ## Delete from list
 
-> curl --data 'data={"data":{"action":"delete","list":"blacklist","name":"noganoo"}}' http://localhost:8080
+> curl --data 'data={"data":{"action":"delete","list":"blacklist","name":"noganoo", "username":"howo",wif:"yourwifhere", "type":"memo"}}' http://localhost:8080
 
 ## Delete group
 
-> curl --data 'data={"data":{"action":"delete","list":"group","name":"noganoo"}}' http://localhost:8080
+> curl --data 'data={"data":{"action":"delete","list":"group","name":"noganoo", "username":"howo",wif:"yourwifhere", "type":"memo"}}' http://localhost:8080
 
 ## Get an user
 
