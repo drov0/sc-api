@@ -16,7 +16,7 @@ const csv_url = "https://docs.google.com/spreadsheets/d/1jOZRIfoZ-5WAjMMQYSH4_8o
 const filename = "./blacklist/Public Blacklist - Abusers - Sheet1.csv";
 
 
-function checkgroupdata_add(data)
+function group_add(data)
 {
     return new Promise(async resolve => {
         if (data['name'] && data['description'] && data['name'] !== "" && data['description'] !== "") {
@@ -24,7 +24,11 @@ function checkgroupdata_add(data)
             if (result.length > 0)
                 return resolve({error: "Group name already defined"});
             else
-                return resolve({error: ""})
+                await fn("INSERT INTO _group(id,name,description) VALUES(NULL,? ,?)", [data['name'], data['description']]).catch(function (err) {
+                    return resolve({error: "Internal server error"});
+                });
+
+            return resolve({ok:"ok"})
         }
         else
             return resolve({error: "invalid name or description"})
@@ -70,7 +74,7 @@ function group_delete(data)
     });
 }
 
-function list_add(data, list)
+function list_add(data)
 {
     return new Promise(async resolve => {
         if (data['name'] && data['group'] && data['category'] && data['added_by'] && data['name'] !== "" && data['group'] !== "" && data['category'] !== "" && data['added_by'] !== "") {
@@ -78,8 +82,7 @@ function list_add(data, list)
 
             if (result.length > 0) {
                 const id = result[0]['id'];
-                if (list === "blacklist") {
-                    await fn("insert into blacklist (name, _group, category, added_by) VALUES(?,?,?,?)", [data['name'], id, data['category'], data['added_by']]).catch(function (err) {
+                    await fn("insert into "+data['list']+" (name, _group, category, added_by) VALUES(?,?,?,?)", [data['name'], id, data['category'], data['added_by']]).catch(function (err) {
                         if (err.code === "ER_DUP_ENTRY")
                             return resolve({error: "User is already in the list"});
                         else
@@ -87,16 +90,6 @@ function list_add(data, list)
                     });
                     return resolve({ok: "ok"});
                 }
-                else if (list === "low_quality") {
-                    await fn("insert into low_quality (name, _group, category, added_by) VALUES(?,?,?,?)", [data['name'], id, data['category'], data['added_by']]).catch(function (err) {
-                        if (err.code === "ER_DUP_ENTRY")
-                            return resolve({error: "User is already in the list"});
-                        else
-                            return resolve({error: "Internal error"});
-                    });
-                    return resolve({ok: "ok"});
-                }
-            }
             else
                 return resolve({error: "Group name unknown"});
         }
@@ -106,7 +99,7 @@ function list_add(data, list)
     });
 }
 
-function list_edit(data, list)
+function list_edit(data)
 {
     return new Promise(async resolve => {
         if (data['name'] && data['group'] && data['category'] && data['added_by'] && data['name'] !== "" && data['group'] !== "" && data['category'] !== "" && data['added_by'] !== "") {
@@ -114,10 +107,10 @@ function list_edit(data, list)
 
             if (result.length > 0) {
                 const id = result[0]['id'];
-                const exists = await fn("select 1 from "+list+" where name = ?", [data['name']]);
+                const exists = await fn("select 1 from "+data['list']+" where name = ?", [data['name']]);
                 if (exists.length > 0) {
 
-                    await fn("update " + list + " set _group = ?, category = ?, added_by = ? where name = ?", [id, data['category'], data['added_by'], data['name']]).catch(function (err) {
+                    await fn("update " + data['list'] + " set _group = ?, category = ?, added_by = ? where name = ?", [id, data['category'], data['added_by'], data['name']]).catch(function (err) {
                         return resolve({error: "Internal error"});
                     });
                     return resolve({ok: "ok"});
@@ -191,21 +184,10 @@ app.post('/', urlencodedParser, async function (req, res) {
         // TODO : Add authentification
         if (data['list'] === "group")
         {
-            const checkresult = await checkgroupdata_add(data);
-            if (checkresult.error === "")
-            {
-                await fn("INSERT INTO _group(id,name,description) VALUES(NULL,? ,?)", [data['name'], data['description']])
-                res.send({ok:"ok"})
-            } else
-                res.send(checkresult)
-        } else if (data['list'] === "blacklist")
+            res.send((await group_add(data)));
+        } else if (data['list'] === "blacklist" || data['list'] === "low_quality")
         {
-            const checkresult = await list_add(data, "blacklist");
-            res.send(checkresult)
-        } else if (data['list'] === "low_quality")
-        {
-            const checkresult = await list_add(data, "low_quality");
-            res.send(checkresult)
+            res.send((await list_add(data)));
         } else
         {
             res.send({error:"Unknown list"})
@@ -218,7 +200,7 @@ app.post('/', urlencodedParser, async function (req, res) {
             return res.send(edit_result);
         } else if (data['list'] === "blacklist" || data['list'] === "low_quality")
         {
-            res.send((await list_edit(data, data['list'])));
+            res.send((await list_edit(data)));
         } else
         {
             res.send({error:"Unknown list"})
@@ -232,7 +214,7 @@ app.post('/', urlencodedParser, async function (req, res) {
             return res.send(edit_result);
         } else if (data['list'] === "blacklist" || data['list'] === "low_quality")
         {
-            res.send((await list_delete(data, data['list'])));
+            res.send((await list_delete(data)));
         } else
         {
             res.send({error:"Unknown list"})
@@ -248,26 +230,6 @@ app.post('/', urlencodedParser, async function (req, res) {
 app.listen(8080, function () {
     console.log("steempress-catcher is ready to go !")
 });
-
-
-async function storedata() {
-    await download(csv_url, 'blacklist');
-
-    let data = fs.readFileSync(filename).toString().split("\r\n");
-
-    for (let i = 0; i < data.length; i++)
-    {
-        fn("INSERT INTO blacklist(name) VALUES(?) ", [data[i]]).catch(function (err) {
-            if (err.code !== "ER_DUP_ENTRY")
-                console.log(err)
-        })
-    }
-
-    console.log("done");
-}
-
-
-
 
 
 /*
