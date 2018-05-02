@@ -10,7 +10,8 @@
     "mysql": "^2.15.0",
     "request": "^2.85.0",
     "request-promise-native": "^1.0.5",
-    "steem": "^0.7.1"
+    "steem": "^0.7.1",
+    "xss": "^0.3.8"
   },
   "devDependencies": {},
   "scripts": {
