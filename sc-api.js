@@ -35,7 +35,7 @@ function group_edit(data)
     return new Promise(async resolve => {
         if (data['name'] && data['description'] && data['name'] !== "" && data['description'] !== "") {
             if ((await fn("select * from _group where name = ?", [data['name']])).length > 0) {
-                await fn("UPDATE _group set name = ?, description = ? where name = ?", [data['name'], data['description'], data['name']]).catch(function (err) {
+                await fn("UPDATE _group set description = ? where name = ?", [data['description'], data['name']]).catch(function (err) {
                     return resolve({error: "Internal server error"});
                 });
                 return resolve({ok: "ok"});
