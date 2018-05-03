@@ -138,7 +138,7 @@ function list_edit(data)
     });
 }
 
-function list_delete(data, list)
+function list_delete(data)
 {
     return new Promise(async resolve => {
         if (data['name'] && data['name'] !== "") {
