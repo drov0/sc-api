@@ -29,7 +29,7 @@ function group_add(data)
     });
 }
 
-
+// TODO : Add a new parameter to edit the group name as well
 function group_edit(data)
 {
     return new Promise(async resolve => {
