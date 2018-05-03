@@ -1,4 +1,4 @@
-<center> ![SteemCleaners.png](https://steemitimages.com/DQmNc5J8wnGVEjoSEt1uFR5ya8E2VoidhuTVHTok49vue94/SteemCleaners.png) </center>
+![SteemCleaners.png](https://steemitimages.com/DQmNc5J8wnGVEjoSEt1uFR5ya8E2VoidhuTVHTok49vue94/SteemCleaners.png) 
 
 A few weeks ago as I was working on the steempress voting bot I figured it would be a nice idea to implement the steemcleaner blacklist to avoid voting on bad content that will get flagged anyways. So I reached out to @patrice and realized that there wasn't one. But There was an excel spreadsheet. 
 
@@ -20,7 +20,7 @@ The code can be found here : https://github.com/drov0/sc-api
 
 ## Database architecture :
 
-<center>![](https://steemitimages.com/DQmWfHbg1wDXcqwV7Fy5ezu1PXBQXD9fZxkGKYiWCngFXQo/image.png)</center>
+![](https://steemitimages.com/DQmWfHbg1wDXcqwV7Fy5ezu1PXBQXD9fZxkGKYiWCngFXQo/image.png)
 
 ### _group : 
 
