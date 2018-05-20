@@ -4,6 +4,7 @@
   "description": "Steemcleaners api",
   "main": "sc-api.js",
   "dependencies": {
+    "commander": "^2.15.1",
     "express": "^4.16.3",
     "mysql": "^2.15.0",
     "steem": "^0.7.1",
@@ -12,6 +13,8 @@
   "devDependencies": {},
   "scripts": {
     "start": "node sc-api.js",
+    "start:legacy": "node sc-api.js --legacy",
+    "start:rest": "node sc-api.js --rest",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Martin Lees",
