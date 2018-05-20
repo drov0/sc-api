@@ -28,12 +28,12 @@ router.use(function(err, req, res, next) {
 
 // Register child routers
 router.use('/groups', groups.router);
-router.use('/lists', groups.router);
+router.use('/lists', lists.router);
 
 // Post-routing "middleware" to catch unimplemented methods
 router.use(function(req, res, next) {
     console.log("got request for unimplemented method %s at path %s", req.method, req.originalUrl);
-    res.send(make_error("method not implemented"));
+    return res.send(make_error("method not implemented"));
 });    
 
 // export router
