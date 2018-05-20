@@ -40,21 +40,21 @@ root.post('/', urlencodedParser, async function (req, res) {
 
         if (data['action'] === "add") {
             if (data['list'] === "group")
-                res.send((await group_add(data)));
+                return res.send((await group_add(data)));
             else if (data['list'] === "blacklist" || data['list'] === "low_quality")
-                res.send((await list_add(data)));
+                return res.send((await list_add(data)));
         }
         else if (data['action'] === "edit") {
             if (data['list'] === "group")
-                res.send((await group_edit(data)));
+                return res.send((await group_edit(data)));
             else if (data['list'] === "blacklist" || data['list'] === "low_quality")
-                res.send((await list_edit(data)));
+                return res.send((await list_edit(data)));
         }
         else if (data['action'] === "delete") {
             if (data['list'] === "group")
-                res.send((await group_delete(data)));
+                return res.send((await group_delete(data)));
             else if (data['list'] === "blacklist" || data['list'] === "low_quality")
-                res.send((await list_delete(data)));
+                return res.send((await list_delete(data)));
         }
         else
             return res.send({error: "Unknown action"})
