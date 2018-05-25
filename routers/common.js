@@ -1,14 +1,20 @@
 const express = require('express');
 const wrapAsync = require('express-async-handler');
 
+const db = require('db.js');
+
 function Router() {
     return express.Router({mergeParams: true});
 }
 
-function catchAll(req, res, next) {
-    return res.status(504).send({error: "method not implemented"})
+function catchErrors(err, req, res, next) {
+    console.error(err);
+    if (err instanceof db.NotFoundError)
+    {
+	return res.status(204).send();
+    }
 }
-			
+
 catchAllRouter = Router();
 
 catchAllRouter.all(/^\/(.+)/, function(req, res, next) {
@@ -22,4 +28,4 @@ catchAllRouter.all("/", function(req, res, next) {
 				 path: req.originalUrl});
 });
 
-module.exports = {Router, catchAllRouter}
+module.exports = {Router, catchAllRouter, catchErrors}

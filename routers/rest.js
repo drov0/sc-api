@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const common = require('routers/common.js');
+const db = require('db.js');
 
 const groupsRouter = require('./rest/groups.js');
 const listsRouter = require('./rest/lists.js');
@@ -20,7 +21,7 @@ router.use(bodyParser.json());
 router.use(function(err, req, res, next) {
     if( err.type === 'entity.parse.failed' )
     {
-	return res.send(make_error("invalid json in request"));
+	return res.status(400).send({error: "invalid json in request"});
     }
     else
     {
@@ -32,6 +33,7 @@ router.use(function(err, req, res, next) {
 router.use('/groups', groupsRouter);
 router.use('/lists', listsRouter);
 
+router.use(common.catchErrors);
 router.use(common.catchAllRouter);
 
 // export router

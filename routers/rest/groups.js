@@ -4,6 +4,8 @@ const wrap = require('express-async-handler');
 const db = require('db.js');
 const common = require('routers/common.js');
 
+const group = require('./groups/group.js');
+
 const router = common.Router()
 
 // GET for /groups
@@ -15,6 +17,9 @@ router.get("/", wrap(async function (req, res, next) {
 
 // PUT and DELETE not supported for /groups
 
+router.use("/:group", group);
+
+router.use(common.catchErrors);
 router.use(common.catchAllRouter);
 
 // export router
