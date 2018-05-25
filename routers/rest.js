@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
+const common = require('routers/common.js');
+
 const groupsRouter = require('./rest/groups.js');
 const listsRouter = require('./rest/lists.js');
 
@@ -11,7 +13,7 @@ function make_error(message)
     return {error: message};
 }
 
-var router = express.Router();
+var router = common.Router();
 
 // Register body-parser middleware and error handler
 router.use(bodyParser.json());
@@ -30,11 +32,7 @@ router.use(function(err, req, res, next) {
 router.use('/groups', groupsRouter);
 router.use('/lists', listsRouter);
 
-// Post-routing "middleware" to catch unimplemented methods
-router.use(function(req, res, next) {
-    console.log("got request for unimplemented method %s at path %s", req.method, req.originalUrl);
-    return res.send(make_error("method not implemented"));
-});    
+router.use(common.catchAllRouter);
 
 // export router
 module.exports = router;

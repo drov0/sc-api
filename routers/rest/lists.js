@@ -1,7 +1,11 @@
 const express = require('express');
-const db = require('db.js');
 
-const router = express.Router();
+const db = require('db.js');
+const common = require('routers/common.js');
+
+const router = common.Router();
+
+router.use(common.catchAllRouter);
 
 // export router
 module.exports = router;
