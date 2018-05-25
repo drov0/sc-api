@@ -1,9 +1,11 @@
+require('app-module-path/register');
+
 const express = require('express');
 const program = require('commander');
 
-const config = require("./config.js");
-const legacyRouter = require("./router-legacy.js");
-const restRouter = require("./router-root.js");
+const config = require("config.js");
+const legacyRouter = require("routers/legacy.js");
+const restRouter = require("routers/rest.js");
 
 program
     .option('--legacy', 'Use legacy POST-only API')

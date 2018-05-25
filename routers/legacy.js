@@ -3,14 +3,14 @@ const bodyParser = require('body-parser');
 const urlencodedParser = bodyParser.urlencoded({extended: false});
 const express = require('express')
 
-const {login} = require("./steem-auth.js");
+const {login} = require("steem-auth.js");
 const {group_add,
        group_edit,
        group_delete,
        list_add,
        list_edit,
        list_delete,
-       list_get} = require("./database.js");
+       list_get} = require("database.js");
 
 const router = express.Router();
 

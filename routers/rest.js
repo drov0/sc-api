@@ -1,8 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
-const groupsRouter = require('./router-groups.js');
-const listsRouter = require('./router-lists.js');
+const groupsRouter = require('./rest/groups.js');
+const listsRouter = require('./rest/lists.js');
 
 const app = express();
 

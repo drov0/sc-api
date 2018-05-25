@@ -1,6 +1,6 @@
 const express = require('express');
 const wrap = require('express-async-handler');
-const db = require('./db.js')
+const db = require('db.js')
 
 const router = express.Router({mergeParams: true});
 
