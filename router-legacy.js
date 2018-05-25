@@ -12,10 +12,10 @@ const {group_add,
        list_delete,
        list_get} = require("./database.js");
 
-const root = express.Router();
+const router = express.Router();
 
 // TODO : Rework all that as a proper REST api ?
-root.post('/', urlencodedParser, async function (req, res) {
+router.post('/', urlencodedParser, async function (req, res) {
     let data = sanitize(req.body.data);
 
     try
@@ -67,4 +67,4 @@ root.post('/', urlencodedParser, async function (req, res) {
 
 });
 
-module.exports = {router: root};
+module.exports = router;

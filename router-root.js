@@ -1,8 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
-const groups = require('./router-groups.js');
-const lists = require('./router-lists.js');
+const groupsRouter = require('./router-groups.js');
+const listsRouter = require('./router-lists.js');
 
 const app = express();
 
@@ -27,8 +27,8 @@ router.use(function(err, req, res, next) {
 });
 
 // Register child routers
-router.use('/groups', groups.router);
-router.use('/lists', lists.router);
+router.use('/groups', groupsRouter);
+router.use('/lists', listsRouter);
 
 // Post-routing "middleware" to catch unimplemented methods
 router.use(function(req, res, next) {
@@ -37,6 +37,6 @@ router.use(function(req, res, next) {
 });    
 
 // export router
-module.exports = {router}
+module.exports = router;
     
 	

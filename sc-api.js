@@ -2,8 +2,8 @@ const express = require('express');
 const program = require('commander');
 
 const config = require("./config.js");
-const legacy = require("./router-legacy.js");
-const rest = require("./router-root.js");
+const legacyRouter = require("./router-legacy.js");
+const restRouter = require("./router-root.js");
 
 program
     .option('--legacy', 'Use legacy POST-only API')
@@ -15,8 +15,8 @@ if( program.legacy && program.rest )
     console.error("Cannot specify both legacy and REST APIs.")
 }
 
-const router = (program.legacy ? legacy.router :
-		program.rest ? rest.router :
+const router = (program.legacy ? legacyRouter :
+		program.rest ? restRouter :
 		// TODO: switch the default to REST when ready
 		legacy.router)
 
