@@ -6,7 +6,7 @@ const common = require('routers/common.js');
 
 const group = require('./groups/group.js');
 
-const router = common.Router()
+const router = common.Router();
 
 // GET for /groups
 router.get("/", wrap(async function (req, res, next) {

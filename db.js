@@ -13,6 +13,22 @@ class DatabaseError extends Error {
 class InvalidArgumentError extends DatabaseError {}
 class NotFoundError extends DatabaseError{}
 class AlreadyPresentError extends DatabaseError{}
+class UnknownError extends DatabaseError{}
+
+async function gid(groupname)
+{
+    var results = await fn(SQL`
+SELECT id FROM _group 
+WHERE name = ${groupname}`);
+
+    if(results.length < 1)
+    {
+	throw new NotFoundError();
+    }
+
+    var id = results[0].id;
+    return id;
+}
 
 async function list_groups()
 {
@@ -27,23 +43,54 @@ SELECT name FROM _group`);
     return groups;
 }
 
-async function gid(name)
-{
-    var results = await fn(SQL`
-SELECT id FROM _group 
-WHERE name = ${name}`);
 
-    if(results.length < 1)
+async function add_group(groupname, description)
+{
+    try
     {
-	throw new NotFoundError();
+	var group_id = await gid(groupname);
+	throw new AlreadyPresentError();
+    }
+    catch (err)
+    {
+	if (!(err instanceof NotFoundError))
+	{
+	    throw err;
+	}	    
     }
 
-    var id = results[0].id;
-    return id;
+    try
+    {
+	await fn(SQL`
+INSERT INTO _group(name, description)
+VALUES(${groupname}, ${description})`)
+    }
+    catch (err)
+    {
+	throw new UnknownError("while adding group");
+    }
 }
 
-async function group_list_members(group_id)
-{    
+async function delete_group(groupname, description)
+{
+    var group_id = await gid(groupname);
+
+    try
+    {
+	await fn(SQL`
+DELETE FROM _group
+WHERE id = ${group_id}`);
+    }
+    catch (err)
+    {	
+	throw new UnknownError("while deleting group");
+    }
+}
+
+async function group_list_members(groupname)
+{
+    var group_id = await gid(groupname);
+    
     var results = await fn(SQL`
 SELECT DISTINCT name
 FROM (SELECT * FROM blacklist
@@ -65,7 +112,8 @@ module.exports = {DatabaseError,
 		  NotFoundError,
 		  AlreadyPresentError,
 		  list_groups,
-		  gid,
+		  delete_group,
+		  add_group,
 		  group_list_members}
 
 

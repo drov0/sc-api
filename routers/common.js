@@ -11,8 +11,13 @@ function catchErrors(err, req, res, next) {
     console.error(err);
     if (err instanceof db.NotFoundError)
     {
-	return res.status(204).send();
+	return res.status(404).send();
     }
+    else if (err instanceof db.AlreadyPresentError)
+    {
+	return res.status(422).send({error: "record already present in the database"});
+    }
+    
 }
 
 catchAllRouter = Router();
