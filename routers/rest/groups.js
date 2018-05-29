@@ -11,8 +11,7 @@ const router = common.Router();
 // GET for /groups
 router.get("/", wrap(async function (req, res, next) {
     groups = await db.list_groups();
-    return res.send({ok: "ok",
-		     groups: groups});
+    return res.send({groups: groups});
 }));
 
 // PUT and DELETE not supported for /groups

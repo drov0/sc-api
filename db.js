@@ -10,9 +10,9 @@ class DatabaseError extends Error {
     }
 }
 
-class InvalidArgumentError extends DatabaseError {}
 class NotFoundError extends DatabaseError{}
 class AlreadyPresentError extends DatabaseError{}
+class InvalidRecordError extends DatabaseError{}
 class UnknownError extends DatabaseError{}
 
 async function gid(groupname)
@@ -23,7 +23,7 @@ WHERE name = ${groupname}`);
 
     if(results.length < 1)
     {
-	throw new NotFoundError();
+	throw new NotFoundError(`group "${groupname}" not found`);
     }
 
     var id = results[0].id;
@@ -49,7 +49,7 @@ async function add_group(groupname, description)
     try
     {
 	var group_id = await gid(groupname);
-	throw new AlreadyPresentError();
+	throw new AlreadyPresentError(`group ${groupname} already exists`);
     }
     catch (err)
     {
@@ -58,7 +58,7 @@ async function add_group(groupname, description)
 	    throw err;
 	}	    
     }
-
+    
     try
     {
 	await fn(SQL`
@@ -107,14 +107,112 @@ FROM (SELECT * FROM blacklist
     return users;
 }
 
+async function list_lists()
+{
+    return ["blacklist", "low_quality"];
+}
+
+async function validate_listname(listname)
+{
+    lists = await list_lists();
+    if(!(lists.includes(listname)))
+    {
+	throw new NotFoundError(`unsupported list "${listname}"`);
+    }
+}
+
+async function list_list_members(listname)
+{
+    await validate_listname(listname);
+
+    var results = await fn(SQL`
+SELECT name FROM `.append(listname));
+
+    var members = []; 
+    for (let result of results)
+    {
+	members.push(result.name);
+    }
+    return members;
+}
+
+async function list_get_member(listname, membername)
+{
+    await validate_listname(listname);
+
+    var record = await fn(SQL`
+SELECT _group, category, added_by FROM `.append(listname).append(SQL`
+WHERE name = ${membername}`));
+
+    var groupname = await fn(SQL`
+SELECT name FROM _group
+WHERE id = ${record[0]._group}`);
+
+    return {group: groupname[0].name,
+	    category: record[0].category,
+	    added_by: record[0].added_by}
+}
+
+async function list_add_member(listname, membername, record)
+{
+    await validate_listname(listname);
+    
+    var check = await fn(SQL`
+SELECT 1 FROM `.append(listname).append(SQL`
+WHERE name = ${membername}`));
+    
+    if(check.length > 0)
+	throw new AlreadyPresentError(`member ${membername} is already in list ${listname}`);
+    if(record.group === undefined)
+	throw new InvalidRecordError("must provide a group");
+    if(record.category === undefined)
+	throw new InvalidRecordError("must provide a category");
+    if(record.added_by === undefined)
+	throw new InvalidRecordError("must provide 'added_by' username");
+
+    try
+    {
+	var group_id = await gid(record.group)
+	await fn(SQL`
+INSERT INTO `.append(listname).append(SQL`(name, _group, category, added_by)
+VALUES(${membername}, ${group_id}, ${record.category}, ${record.added_by})`));
+    }
+    catch (err)
+    {
+	if (err instanceof NotFoundError)
+	    throw new InvalidRecordError("provided group must already exist");
+    }
+}
+
+async function list_delete_member(listname, membername)
+{
+    await validate_listname(listname);
+    
+    var check = await fn(SQL`
+SELECT 1 FROM `.append(listname).append(SQL`
+WHERE name = ${membername}`));
+    
+    if(check.length < 1)
+	throw new NotFoundError(`member "${membername}" not found in list "${listname}"`);
+    
+    await fn(SQL`
+DELETE FROM `.append(listname).append(SQL`
+WHERE name = ${membername}`));
+}
+
 module.exports = {DatabaseError,
-		  InvalidArgumentError,
 		  NotFoundError,
 		  AlreadyPresentError,
+		  InvalidRecordError,
 		  list_groups,
 		  delete_group,
 		  add_group,
-		  group_list_members}
+		  group_list_members,
+		  list_lists,
+		  list_list_members,
+		  list_get_member,
+		  list_add_member,
+		  list_delete_member}
 
 
 

@@ -8,16 +8,18 @@ function Router() {
 }
 
 function catchErrors(err, req, res, next) {
-    console.error(err);
     if (err instanceof db.NotFoundError)
-    {
-	return res.status(404).send();
-    }
+	return res.status(404).send({error: err.message});
     else if (err instanceof db.AlreadyPresentError)
+	return res.status(422).send({error: err.message});
+    else if (err instanceof db.InvalidRecordError)
+	return res.status(400).send({error: err.message});
+    else
     {
-	return res.status(422).send({error: "record already present in the database"});
+	console.error(err);
+	return res.status(500).send({error: "internal error",
+				     message: err.message});
     }
-    
 }
 
 catchAllRouter = Router();
