@@ -44,6 +44,8 @@ By running using `npm run start:rest`, the experimental REST API can be started.
 
 ## Input
 For `PUT` methods, the REST API accepts data of type `application/json` containing a single JSON object of the <b>same form as the one returned by a <code>GET</code> request</b>.
+* One exception: if specified, <b><code>members</code> will be ignored</b> in a PUT to `/groups/:group`. 
+
 
 ## Output
 Response codes will be as follows:

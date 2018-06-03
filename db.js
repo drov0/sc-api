@@ -107,6 +107,17 @@ FROM (SELECT * FROM blacklist
     return users;
 }
 
+async function group_get_description(groupname)
+{
+    var group_id = await gid(groupname);
+    
+    var results = await fn(SQL`
+SELECT description FROM _group
+WHERE id = ${group_id}`);
+
+    return results[0].description;    
+}
+
 async function list_lists()
 {
     return ["blacklist", "low_quality"];
@@ -208,6 +219,7 @@ module.exports = {DatabaseError,
 		  delete_group,
 		  add_group,
 		  group_list_members,
+		  group_get_description,
 		  list_lists,
 		  list_list_members,
 		  list_get_member,

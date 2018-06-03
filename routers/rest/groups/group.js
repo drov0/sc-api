@@ -10,8 +10,9 @@ const router = common.Router();
 router.get("/", wrap( async function (req, res) {
     // get all members of the group
     var members = await db.group_list_members(req.params.group);
+    var description = await db.group_get_description(req.params.group);
 
-    return res.send({members: members});
+    return res.send({members: members, description: description});
 }));
 
 // PUT for /groups/:groupname
