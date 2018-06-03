@@ -1,6 +1,17 @@
 const steem = require('steem');
 const config = require("./config.js");
 
+class AuthError extends Error {
+    constructor(message) {
+	super(message);
+	this.name = this.constructor.name
+    }
+}
+
+class BadAuthDataError extends AuthError {}
+class InvalidCredentialError extends AuthError {}
+class AccessDeniedError extends AuthError {}
+
 /**
  * Tests if an username/private key pair is correct
  * @param {String} username - username of the account
@@ -14,6 +25,8 @@ function login_using_wif(username, wif, type) {
 
     return new Promise(resolve => {
         steem.api.getAccounts([username], function (err, result) {
+	    console.log(err);
+	    console.log(result);
             // check if the account exists
             if (result.length !== 0) {
                 // get the public posting key
@@ -62,4 +75,9 @@ function login(data)
     });
 }
 
-module.exports = {login}
+module.exports = {login,
+		  login_using_wif,
+		  AuthError,
+		  BadAuthDataError,
+		  InvalidCredentialError,
+		  AccessDeniedError}

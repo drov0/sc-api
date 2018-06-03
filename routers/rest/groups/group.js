@@ -16,7 +16,7 @@ router.get("/", wrap( async function (req, res) {
 }));
 
 // PUT for /groups/:groupname
-router.put("/", wrap( async function(req, res) {
+router.put("/", common.requireAuth, wrap( async function(req, res) {
     if(req.body.description === undefined)
 	return res.status(400).send({error: "invalid record format"});
 
@@ -25,7 +25,7 @@ router.put("/", wrap( async function(req, res) {
 }));
 
 // DELETE for /groups/:groupname
-router.delete("/", wrap( async function(req, res) {
+router.delete("/", common.requireAuth, wrap( async function(req, res) {
     await db.delete_group(req.params.group);
     return res.status(204).send();
 }));

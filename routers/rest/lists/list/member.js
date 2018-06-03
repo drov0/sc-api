@@ -13,13 +13,13 @@ router.get("/", wrap( async function (req, res) {
 }));
 
 // PUT for /lists/:list/:member
-router.put("/", wrap( async function(req, res) {
+router.put("/", common.requireAuth, wrap( async function(req, res) {
     await db.list_add_member(req.params.list, req.params.member, req.body);
     return res.status(204).send();
 }));
 
 // DELETE for /lists/:list/:member
-router.delete("/", wrap( async function(req, res) {
+router.delete("/", common.requireAuth, wrap( async function(req, res) {
     await db.list_delete_member(req.params.list, req.params.member);
     return res.status(204).send();
 }));
