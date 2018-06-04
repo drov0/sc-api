@@ -38,14 +38,24 @@ Those are the actual lists where we store the account names.
 * category : flag category, it's used to determine at which percent the bot should flag it.
 * added_by : username of the person reporting that abuser.
 
+# Prerequisites
+
+* Ensure that you have MySQL or compatible (e.g. MariaDB) installed and running.
+* Create a new empty database "sc-api" for holding data.
+* Configure the connection details in `config.js` to use the database.
+* Run `npm install`.
+* Run `mysql -p -u <user> "sc-api" < db.sql`, where `<user>` is your configured user.
+
 # REST API
 
 By running using `npm run start:rest`, the experimental REST API can be started.
 
+## Authentication
+Authentication is required for any write operation (non-GET methods). Credentials must be sent via [HTTP Basic authentication](https://en.wikipedia.org/wiki/Basic_access_authentication#Client_side), with the Steem username as the user and a private posting or memo key as the password.
+
 ## Input
 For `PUT` methods, the REST API accepts data of type `application/json` containing a single JSON object of the <b>same form as the one returned by a <code>GET</code> request</b>.
 * One exception: if specified, <b><code>members</code> will be ignored</b> in a PUT to `/groups/:group`. 
-
 
 ## Output
 Response codes will be as follows:
