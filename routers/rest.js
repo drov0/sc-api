@@ -7,16 +7,9 @@ const db = require('db.js');
 const groupsRouter = require('./rest/groups.js');
 const listsRouter = require('./rest/lists.js');
 
-const app = express();
-
-function make_error(message)
-{
-    return {error: message};
-}
-
 var router = common.Router();
 
-// Register body-parser middleware and error handler
+// Register body-parser middleware and error handler.
 router.use(bodyParser.json());
 router.use(function(err, req, res, next) {
     if( err.type === 'entity.parse.failed' )
@@ -29,14 +22,13 @@ router.use(function(err, req, res, next) {
     }
 });
 
-// Register child routers
+// Register child routers for aggregate "groups" and "lists" endpoints.
 router.use('/groups', groupsRouter);
 router.use('/lists', listsRouter);
 
+// Add common middleware.
 router.use(common.catchErrors);
 router.use(common.catchAllRouter);
 
-// export router
+// Export router object as module.
 module.exports = router;
-    
-	

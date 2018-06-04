@@ -1,13 +1,15 @@
 const steem = require('steem');
 const config = require("./config.js");
 
+// Define a custom Error class for authentication errors. The
+// constructor implementation allows more specific errors to be
+// derived as one-liners.
 class AuthError extends Error {
     constructor(message) {
 	super(message);
 	this.name = this.constructor.name
     }
 }
-
 class BadAuthDataError extends AuthError {}
 class InvalidCredentialError extends AuthError {}
 class AccessDeniedError extends AuthError {}
@@ -25,8 +27,6 @@ function login_using_wif(username, wif, type) {
 
     return new Promise(resolve => {
         steem.api.getAccounts([username], function (err, result) {
-	    console.log(err);
-	    console.log(result);
             // check if the account exists
             if (result.length !== 0) {
                 // get the public posting key
@@ -52,8 +52,8 @@ function login_using_wif(username, wif, type) {
     });
 }
 
-function login(data)
-{
+// Login function used for legacy API.
+function login(data) {
     return new Promise(async resolve => {
 
         if (data['username'] && data['wif'] && data['type'] && data['username'] !== "" && data['wif'] !== "" && data['type'] !== "") {
@@ -68,8 +68,7 @@ function login(data)
                 return resolve({error: "Wrong username/wif/type combination", ok : false});
 
             return resolve({ok : true});
-        } else
-        {
+        } else {
             return resolve({error: "Invalid login parameters", ok : false});
         }
     });

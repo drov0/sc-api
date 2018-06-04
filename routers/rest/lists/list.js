@@ -8,22 +8,23 @@ const member = require('./list/member.js');
 
 const router = common.Router();
 
-// GET for /lists/:listname
-router.get("/", wrap( async function (req, res) {
-    // get all members of the list
+// Define GET method for "individual list" endpoint.
+router.get("/", wrap(async function (req, res) {
+    // Get all members of the list and send them to the client.
     var members = await db.list_list_members(req.params.list);
-
     return res.send({members: members});
 }));
 
-// PUT and DELETE not supported for individual lists
-// (they are hardcoded for now)
+// PUT and DELETE are not supported for individual lists,
+// as the set of lists (unlike groups) are hard-coded and
+// immutable.
 
+// Add child router for "list member" endpoint.
 router.use("/:member", member);
 
+// Add common middleware.
 router.use(common.catchErrors);
 router.use(common.catchAllRouter);
 
-
-// export router
+// Export router object as module.
 module.exports = router;
