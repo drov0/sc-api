@@ -11,7 +11,6 @@ The needs are relatively simple :
 - Authentification via steem accounts to prevent people from editing the data 
 
 - A get function which returns if the user is in the blacklist or low quality list
-
   ​
 
 But then I wanted to produce a really clean a good product with tons of comprehensive error messages and an easy to read code which took quite some time to get right.  
@@ -27,9 +26,7 @@ The code can be found here : https://github.com/drov0/sc-api
 An abuser may have several accounts, this table is here to provide an id that will be put on the lists so that you can easily link accounts to a specific abuser. 
 
 * name : Name of the group (Eg : noganoo)
-
 * Description : Description of the abuser
-
 
 ### blacklist / low quality
 
@@ -41,7 +38,56 @@ Those are the actual lists where we store the account names.
 * category : flag category, it's used to determine at which percent the bot should flag it.
 * added_by : username of the person reporting that abuser.
 
-# API Endpoints
+# Prerequisites
+
+* Ensure that you have MySQL or compatible (e.g. MariaDB) installed and running.
+* Create a new empty database "sc-api" for holding data.
+* Configure the connection details in `config.js` to use the database.
+* Run `npm install`.
+* Run `mysql -p -u <user> "sc-api" < db.sql`, where `<user>` is your configured user.
+
+# REST API
+
+By running using `npm run start:rest`, the experimental REST API can be started.
+
+## Authentication
+Authentication is required for any write operation (non-GET methods). Credentials must be sent via [HTTP Basic authentication](https://en.wikipedia.org/wiki/Basic_access_authentication#Client_side), with the Steem username as the user and a private posting or memo key as the password.
+
+## Input
+For `PUT` methods, the REST API accepts data of type `application/json` containing a single JSON object of the <b>same form as the one returned by a <code>GET</code> request</b>.
+* One exception: if specified, <b><code>members</code> will be ignored</b> in a PUT to `/groups/:group`. 
+
+## Output
+Response codes will be as follows:
+
+<table>
+<tr><th>Code</th><th>Situation</th></tr>
+<tr><td>200</td><td>Successful operation; the body has type <code>application/json</code> containing a single JSON object with content defined in the <b>Endpoints</b> table below.</td></tr>
+<tr><td>204</td><td>Successful operation; no body follows.</td></tr>
+<tr><td>400</td><td>Bad request: there was something wrong with your request; the body has type <code>application/json</code> containing a single JSON object. <code>error</code> has information about the error.</td></tr>
+<tr><td>404</td><td>Not found: the endpoint you referenced could not be found; the body structure is the same as for 400.</td></tr>
+<tr><td>422</td><td>Already exists: the record you were trying to create already exists; the body structure is the same as for 400.</td></tr>
+<tr><td>500</td><td>Internal error: something bad happened on the server; the body structure is the same as for 400 with additional details about the error.</td></tr>
+</table>
+
+## Endpoints
+The following endpoints are available with the methods listed. 
+
+<table>
+<tr><th>Endpoint</th><th>Method</th><th>Description of response</th></tr>
+<tr><td><code>/lists</code></td><td><code>GET</code></td><td><code>lists</code> has a list of all the list names.</td></tr>
+<tr><td><code>/lists/:list</code></td><td><code>GET</code></td><td><code>members</code> has a list of all the member usernames.</td></tr>
+<tr><td rowspan=3><code>/lists/:list/:member</code></td><td><code>GET</code></td><td><code>group</code> has the group under which the member was added.<br><code>category</code> has the category under which the member was added.<br><code>added_by</code> has the name of the user who added the member.</td></tr>
+<tr><td><code>PUT</code></td><td>204 if successful.</td></tr>
+<tr><td><code>DELETE</code></td><td>204 if successful.</td></tr>
+<tr><td><code>/groups</code></td><td><code>GET</code></td><td><code>groups</code> has a list of all the group names.</td></tr>
+<tr><td rowspan=3><code>/groups/:group</code></td><td><code>GET</code></td><td><code>members</code> has a list of all the member usernames.<br> <code>description</code> has the description of the group. </td></tr>
+<tr><td><code>PUT</code></td><td>204 if successful.</tr>
+<tr><td><code>DELETE</code></td><td>204 if successful. </td></tr>
+</table>
+
+
+# Legacy API
 
 All queries must be done on the root (aka /) via a post request with a single variable "data" which will contain a json string with the data.
 

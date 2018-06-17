@@ -2,17 +2,24 @@
   "name": "sc-api",
   "version": "1.0.0",
   "description": "Steemcleaners api",
-  "main": "steemdata.js",
+  "main": "sc-api.js",
   "dependencies": {
+    "app-module-path": "^2.2.0",
+    "commander": "^2.15.1",
     "express": "^4.16.3",
+    "express-async-handler": "^1.1.3",
     "mysql": "^2.15.0",
+    "sql-template-strings": "^2.2.2",
     "steem": "^0.7.1",
     "xss": "^0.3.8"
   },
   "devDependencies": {},
   "scripts": {
+    "start": "node sc-api.js",
+    "start:legacy": "node sc-api.js --legacy",
+    "start:rest": "node sc-api.js --rest",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Martin Lees",
-  "license": "GNU"
+  "license": "MIT"
 }
